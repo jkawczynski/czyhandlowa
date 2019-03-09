@@ -20,5 +20,8 @@ RUN pip install -r /srv/app/requirements.txt
 
 COPY . /srv/app/
 
+WORKDIR /srv/app/
+RUN python -m unittest
+
 EXPOSE 80
 CMD ["supervisord", "-n"]

@@ -1,14 +1,12 @@
+import datetime
+from functools import lru_cache
 from typing import List
 
 from flask import Flask, jsonify
-from functools import lru_cache
+from flask.json import JSONEncoder
+from flask_caching import Cache
 
-import datetime
-
-app = Flask(__name__)
-
-
-shopping_sundays = (
+SHOPPING_SUNDAYS = (
     (2019, 1, 27),
     (2019, 2, 24),
     (2019, 3, 31),
@@ -27,6 +25,28 @@ shopping_sundays = (
 )
 
 
+class ISODateJSONEncoder(JSONEncoder):
+    """
+    JSON Encoder which converts `datetime.date` objects to ISOFormat
+    """
+
+    def default(self, obj):
+        try:
+            if isinstance(obj, datetime.date):
+                return obj.isoformat()
+            iterable = iter(obj)
+        except TypeError:
+            pass
+        else:
+            return list(iterable)
+        return JSONEncoder.default(self, obj)
+
+
+app = Flask(__name__)
+app.json_encoder = ISODateJSONEncoder
+cache = Cache(app, config={'CACHE_TYPE': 'simple'})
+
+
 @lru_cache()
 def get_available_sundays() -> List[datetime.date]:
     """
@@ -34,7 +54,7 @@ def get_available_sundays() -> List[datetime.date]:
 
     :return: List of shopping sundays
     """
-    return [datetime.date(*date) for date in shopping_sundays]
+    return [datetime.date(*date) for date in SHOPPING_SUNDAYS]
 
 
 def is_shopping_sunday(date: datetime.date) -> bool:
@@ -76,14 +96,23 @@ def get_next_sunday(date: datetime.date) -> datetime.date:
     return date + datetime.timedelta((6 - date.weekday()) % 7)
 
 
-@app.route("/")
+@cache.cached(timeout=60)
+@app.route("/", methods=("GET",))
 def shopping_sunday():
     today = datetime.date.today()
-    return jsonify({
-        "is_shopping": is_shopping_sunday(get_next_sunday(today)),
-        "next_shopping_sunday": get_next_shopping_sunday(today),
-        "is_today_shopping_sunday": today.weekday() == 6,
-    })
+    return jsonify(
+        {
+            "is_today_shopping_sunday": is_shopping_sunday(today),
+            "is_next_sunday_shopping": is_shopping_sunday(get_next_sunday(today)),
+            "next_shopping_sunday": get_next_shopping_sunday(today),
+        }
+    )
+
+
+@cache.cached()
+@app.route("/shopping_sundays", methods=("GET",))
+def list_shopping_sundays():
+    return jsonify(get_available_sundays())
 
 
 if __name__ == "__main__":

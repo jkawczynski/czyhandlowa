@@ -2,12 +2,8 @@
 import datetime
 from unittest import TestCase, mock
 
-from app.main import (
-    get_available_sundays,
-    is_shopping_sunday,
-    get_next_sunday,
-    get_next_shopping_sunday,
-)
+from app.main import (get_available_sundays, get_next_shopping_sunday,
+                      get_next_sunday, is_shopping_sunday)
 
 
 class ShoppingSundaysTestCase(TestCase):
