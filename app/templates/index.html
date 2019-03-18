@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Czy niedziela handlowa?</title>
+    <style>
+        body{
+            margin: 0;
+            font-family: sans-serif;
+            text-align: center;
+        }
+        div {
+            margin: 0 auto;
+        }
+        h1 {
+            font-size: 72px;
+        }
+        h2 {
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <h1>{{ 'TAK' if context.is_today_shopping_sunday else 'NIE' }}</h1>
+        <h2>Czy następna niedziela jest handlowa: {{ 'TAK' if context.is_next_sunday_shopping else 'NIE' }}</h2>
+        <h2>Następna niedziela handlowa: {{ context.next_shopping_sunday }}</h2>
+    </div>
+</body>
+</html>

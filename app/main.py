@@ -2,7 +2,7 @@ import datetime
 from functools import lru_cache
 from typing import List
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, render_template
 from flask.json import JSONEncoder
 from flask_caching import Cache
 
@@ -96,21 +96,28 @@ def get_next_sunday(date: datetime.date) -> datetime.date:
     return date + datetime.timedelta((6 - date.weekday()) % 7)
 
 
-@cache.cached(timeout=60)
-@app.route("/", methods=("GET",))
-def shopping_sunday():
+def get_context():
     today = datetime.date.today()
-    return jsonify(
-        {
-            "is_today_shopping_sunday": is_shopping_sunday(today),
-            "is_next_sunday_shopping": is_shopping_sunday(get_next_sunday(today)),
-            "next_shopping_sunday": get_next_shopping_sunday(today),
-        }
-    )
+    return {
+        "is_today_shopping_sunday": is_shopping_sunday(today),
+        "is_next_sunday_shopping": is_shopping_sunday(get_next_sunday(today)),
+        "next_shopping_sunday": get_next_shopping_sunday(today),
+    }
+
+
+@app.route("/", methods=("GET",))
+def index():
+    return render_template('index.html', context=get_context())
+
+
+@cache.cached(timeout=60)
+@app.route("/api", methods=("GET",))
+def shopping_sunday():
+    return jsonify(get_context())
 
 
 @cache.cached()
-@app.route("/shopping_sundays", methods=("GET",))
+@app.route("/api/shopping_sundays", methods=("GET",))
 def list_shopping_sundays():
     return jsonify(get_available_sundays())
 
