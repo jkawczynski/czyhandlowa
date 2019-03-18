@@ -1,4 +1,4 @@
-## flask-uwsgi-nginx template app
+## czyhandlowa
 
 Build:
 `docker build -t jkawczynski/czyhandlowa .`
