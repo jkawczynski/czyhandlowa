@@ -1,8 +1,8 @@
-## flask-uwsgi-nginx template app
+## [czyhandlowa.com](https://czyhandlowa.com/)
 
 Build:
-`docker build -t jkawczynski/flask-uwsgi-nginx`
+`docker build -t jkawczynski/czyhandlowa .`
 
 Run:
-`docker run -p 80:80 jkawczynski/flask-app`
+`docker run --name czyhandlowa -d jkawczynski/czyhandlowa`
 
